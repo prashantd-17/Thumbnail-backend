@@ -3,13 +3,13 @@ import cors from "cors";
 import ytdl from "ytdl-core";
 // import nodemailer from "nodemailer";
 import { Resend } from "resend";
+
+const app = express();
 app.use(cors({
   origin: "*",
   methods: ["POST", "GET", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
-
-const app = express();
 app.use(express.json());
 
 // ✅ Primary LibreTranslate mirror (confirmed working)
