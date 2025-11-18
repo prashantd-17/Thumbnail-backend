@@ -1,7 +1,8 @@
 import express from "express";
 import cors from "cors";
 import ytdl from "ytdl-core";
-import nodemailer from "nodemailer";
+// import nodemailer from "nodemailer";
+import { Resend } from "resend";
 
 const app = express();
 app.use(cors());
@@ -139,35 +140,61 @@ app.post("/api/translate", async (req, res) => {
 });
 
 // new portfolio app 
+// app.post("/send-email", async (req, res) => {
+//   const { name, email, message } = req.body;
+
+//   const transporter = nodemailer.createTransport({
+//     service: "gmail",
+//     auth: {
+//       user: "xyz@gmail.com",
+//       pass: "abc xyz ddd dkt"  // Gmail App password
+//     }
+//   });
+
+//   const mail = {
+//     from: email,
+//     to: "xyz@gmail.com",
+//     subject: `Portfolio Contact from ${name}`,
+//     text: message + "\n\nReply to: " + email
+//   };
+
+//   try {
+//    transporter.sendMail(mail)
+//     .then(() => console.log("Email sent successfully"))
+//     .catch(err => console.error("Email error:", err));
+
+//   // 👇 Respond instantly so Render does NOT timeout
+//   res.json({ status: "queued" });
+
+//   } catch (err) {
+//     res.status(500).json(err);
+//   }
+// });
+
+const resend = new Resend('re_RDFF4JTo_NporqeVHRCKSMiZDPiAsVM9u');
+
 app.post("/send-email", async (req, res) => {
   const { name, email, message } = req.body;
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-      user: "pd.myportfolio@gmail.com",
-      pass: "neof pvzv admz hivf"  // Gmail App password
-    }
-  });
-
-  const mail = {
-    from: email,
-    to: "pd.myportfolio@gmail.com",
-    subject: `Portfolio Contact from ${name}`,
-    text: message + "\n\nReply to: " + email
-  };
-
   try {
-   transporter.sendMail(mail)
-    .then(() => console.log("Email sent successfully"))
-    .catch(err => console.error("Email error:", err));
+    await resend.emails.send({
+      from: "Portfolio Contact <onboarding@resend.dev>",
+      to: "pd.myportfolio@gmail.com",
+      subject: `Message from ${name}`,
+      html: `
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p>${message}</p>
+      `
+    });
 
-  // 👇 Respond instantly so Render does NOT timeout
-  res.json({ status: "queued" });
-
+    return res.json({ status: "sent" });
   } catch (err) {
-    res.status(500).json(err);
+    console.error("Email error:", err);
+    return res.status(500).json({ status: "error", message: err.message });
   }
 });
+
 
 app.listen(3000, () => console.log("✅ Backend running on http://localhost:3000"));
