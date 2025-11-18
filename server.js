@@ -10,6 +10,7 @@ app.use(cors({
   methods: ["POST", "GET", "OPTIONS"],
   allowedHeaders: ["Content-Type"]
 }));
+app.use(express.text({ type: "text/plain" }));  // Beacon payload
 app.use(express.json());
 
 // ✅ Primary LibreTranslate mirror (confirmed working)
@@ -175,19 +176,28 @@ app.post("/api/translate", async (req, res) => {
 // });
 
 const resend = new Resend('re_RDFF4JTo_NporqeVHRCKSMiZDPiAsVM9u');
-app.use(express.text({ type: "*/*" }));
 app.post("/send-email", express.text({ type: "*/*" }), async (req, res) => {
-  let data = req.body;
+   let data = req.body;
 
-  // If body is a string (Beacon), parse it
+  // Detect Beacon string
   if (typeof data === "string") {
+    console.log("📦 Raw Beacon payload:", data);
     try {
       data = JSON.parse(data);
-    } catch {
-      return res.status(400).json({ error: "Invalid JSON" });
+    } catch (err) {
+      console.error("❌ Failed to parse beacon JSON:", err);
+      return res.status(400).json({ error: "Invalid beacon data" });
     }
   }
-  const { name, email, message } = req.body;
+
+  console.log("📥 Parsed data:", data);
+
+  const { name, email, message } = data;
+  console.log("📩 Received contact:", { name, email, message });
+
+  if (!name || !email || !message) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
 
   try {
     await resend.emails.send({
