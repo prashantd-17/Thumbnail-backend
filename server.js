@@ -76,7 +76,6 @@ app.get("/", (req, res) => {
   res.send("✅ YouTube Video Downloader API is running...");
 });
 
-
 // New backend for Transcriptor and translation web app 
 app.post("/api/translate", async (req, res) => {
   const { q, source, target } = req.body;
@@ -176,7 +175,7 @@ app.post("/api/translate", async (req, res) => {
 // });
 
 const resend = new Resend('re_RDFF4JTo_NporqeVHRCKSMiZDPiAsVM9u');
-
+app.use(express.text({ type: "*/*" }));
 app.post("/send-email", express.text({ type: "*/*" }), async (req, res) => {
   let data = req.body;
 
