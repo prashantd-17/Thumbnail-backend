@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import ytdl from "ytdl-core";
+import nodemailer from "nodemailer";
 
 const app = express();
 app.use(cors());
@@ -134,6 +135,33 @@ app.post("/api/translate", async (req, res) => {
         details: fallbackError.message,
       });
     }
+  }
+});
+
+// new portfolio app 
+app.post("/send-email", async (req, res) => {
+  const { name, email, message } = req.body;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: "pd.myportfolio@gmail.com",
+      pass: "neof pvzv admz hivf"  // Gmail App password
+    }
+  });
+
+  const mail = {
+    from: email,
+    to: "pd.myportfolio@gmail.com",
+    subject: `Portfolio Contact from ${name}`,
+    text: message + "\n\nReply to: " + email
+  };
+
+  try {
+    await transporter.sendMail(mail);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json(err);
   }
 });
 
