@@ -3,9 +3,13 @@ import cors from "cors";
 import ytdl from "ytdl-core";
 // import nodemailer from "nodemailer";
 import { Resend } from "resend";
+app.use(cors({
+  origin: "*",
+  methods: ["POST", "GET", "OPTIONS"],
+  allowedHeaders: ["Content-Type"]
+}));
 
 const app = express();
-app.use(cors());
 app.use(express.json());
 
 // ✅ Primary LibreTranslate mirror (confirmed working)
@@ -173,7 +177,17 @@ app.post("/api/translate", async (req, res) => {
 
 const resend = new Resend('re_RDFF4JTo_NporqeVHRCKSMiZDPiAsVM9u');
 
-app.post("/send-email", async (req, res) => {
+app.post("/send-email", express.text({ type: "*/*" }), async (req, res) => {
+  let data = req.body;
+
+  // If body is a string (Beacon), parse it
+  if (typeof data === "string") {
+    try {
+      data = JSON.parse(data);
+    } catch {
+      return res.status(400).json({ error: "Invalid JSON" });
+    }
+  }
   const { name, email, message } = req.body;
 
   try {
