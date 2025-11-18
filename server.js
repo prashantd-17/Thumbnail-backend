@@ -158,8 +158,13 @@ app.post("/send-email", async (req, res) => {
   };
 
   try {
-    await transporter.sendMail(mail);
-    res.json({ success: true });
+   transporter.sendMail(mail)
+    .then(() => console.log("Email sent successfully"))
+    .catch(err => console.error("Email error:", err));
+
+  // 👇 Respond instantly so Render does NOT timeout
+  res.json({ status: "queued" });
+
   } catch (err) {
     res.status(500).json(err);
   }
